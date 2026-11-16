@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxia IA - Interfaz Oficial del Video</title>
+    <!-- Configuración para PWA / Descarga de app -->
+    <meta name="theme-color" content="#0b0b0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b0b0f; color: #e3e3e3; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #2b2c33; border-radius: 3px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col justify-between overflow-hidden relative bg-[#0b0b0f]">
+
+    <!-- TOP BAR -->
+    <header class="flex items-center justify-between px-4 py-3 z-20">
+        <button onclick="toggleSidebar()" class="text-gray-300 hover:text-white p-2 text-lg"><i class="fa-solid fa-bars"></i></button>
+        
+        <div class="relative">
+            <button onclick="toggleModelMenu()" class="flex items-center gap-2 text-white font-medium text-sm bg-[#16161c] px-3 py-1.5 rounded-full border border-white/10 shadow-sm">
+                <span id="current-model-label">Galaxy Pro</span> <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div id="model-menu" class="absolute top-12 left-1/2 -translate-x-1/2 w-48 bg-[#16161c] border border-white/10 rounded-2xl shadow-xl hidden flex-col py-2 z-30">
+                <button onclick="selectModel('Galaxy Pro')" class="text-left px-4 py-2 text-sm hover:bg-white/5 text-white">Galaxy Pro</button>
+                <button onclick="selectModel('Galaxy Ultra')" class="text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-300">Galaxy Ultra</button>
+            </div>
+        </div>
+
+        <button onclick="nuevoChat()" class="text-gray-300 hover:text-white p-2 text-lg"><i class="fa-solid fa-pen-to-square"></i></button>
+    </header>
+
+    <!-- CENTER WELCOME SCREEN / CHAT AREA -->
+    <div id="main-content" class="flex-1 flex flex-col items-center justify-center p-6 text-center overflow-y-auto max-w-xl mx-auto w-full">
+        <!-- STAR ICON WITH GLOW -->
+        <div class="relative mb-6">
+            <div class="absolute inset-0 bg-purple-500/30 blur-2xl rounded-full"></div>
+            <div class="relative w-20 h-20 rounded-3xl bg-gradient-to-tr from-purple-600 via-pink-500 to-indigo-500 flex items-center justify-center shadow-2xl border border-white/20">
+                <i class="fa-solid fa-star text-white text-3xl"></i>
+            </div>
+        </div>
+
+        <h1 class="text-2xl md:text-3xl font-bold text-white mb-4 leading-snug">Hola amigo, ¿qué tal las matemáticas?</h1>
+
+        <div class="inline-block bg-[#16161c] border border-purple-500/30 text-purple-300 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+            <span id="active-tool-badge">IA de Preguntas</span>
+        </div>
+    </div>
+
+    <!-- FLOATING INPUT FOOTER - Ajustado con mayor separación inferior -->
+    <div class="p-4 pb-16 md:pb-8 z-20 w-full max-w-xl mx-auto">
+        <div class="relative bg-[#16161c] rounded-3xl border border-white/10 p-2 shadow-2xl flex items-center gap-2">
+            
+            <!-- TOOLS POPUP BUTTON (+) -->
+            <div class="relative">
+                <button type="button" onclick="toggleToolsMenu()" class="w-10 h-10 rounded-2xl bg-[#22222d] text-gray-300 hover:text-white flex items-center justify-center transition shadow cursor-pointer">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                </button>
+                
+                <!-- TOOLS DROPDOWN LIST -->
+                <div id="tools-dropdown" class="absolute bottom-14 left-0 w-64 bg-[#16161c] border border-white/10 rounded-3xl shadow-2xl hidden flex-col py-2 z-40">
+                    <button type="button" onclick="selectTool('Mandar fotos a la IA', 'fa-image')" class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 text-gray-200 text-left"><i class="fa-solid fa-image text-cyan-400"></i> Mandar fotos a la IA</button>
+                    <button type="button" onclick="selectTool('IA de Preguntas', 'fa-circle-question')" class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 text-gray-200 text-left"><i class="fa-solid fa-circle-question text-blue-400"></i> IA de Preguntas</button>
+                    <button type="button" onclick="selectTool('IA de Estudio (Tablas 2 al 9)', 'fa-graduation-cap')" class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 text-gray-200 text-left"><i class="fa-solid fa-graduation-cap text-indigo-400"></i> IA de Estudio (Tablas 2 al 9)</button>
+                    <button type="button" onclick="selectTool('IA de Imágenes', 'fa-palette')" class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 text-gray-200 text-left"><i class="fa-solid fa-palette text-pink-400"></i> IA de Imágenes</button>
+                    <button type="button" onclick="selectTool('IA Google Maps', 'fa-map-location-dot')" class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 text-gray-200 text-left"><i class="fa-solid fa-map-location-dot text-emerald-400"></i> IA Google Maps</button>
+                    <button type="button" onclick="selectTool('IA de Noticias & Búsqueda', 'fa-newspaper')" class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 text-gray-200 text-left"><i class="fa-solid fa-newspaper text-amber-400"></i> IA de Noticias & Búsqueda</button>
+                </div>
+            </div>
+
+            <input type="text" id="user-input" placeholder="Preguntarle a Galaxia..." class="flex-1 bg-transparent text-white text-sm px-2 outline-none">
+            
+            <button type="button" onclick="activarMicrofono()" class="text-gray-400 hover:text-white p-2 cursor-pointer"><i id="mic-icon" class="fa-solid fa-microphone text-sm"></i></button>
+            
+            <button type="button" onclick="enviarMensaje()" class="w-10 h-10 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center transition shadow-lg cursor-pointer">
+                <i class="fa-solid fa-arrow-up text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- SIDEBAR DRAWER -->
+    <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-[#16161c] border-r border-white/10 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4 shadow-2xl">
+        <div>
+            <div class="flex items-center justify-between mb-6">
+                <span class="font-bold text-base text-white flex items-center gap-2"><i class="fa-solid fa-sparkles text-purple-400"></i> Chats anteriores</span>
+                <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="space-y-2 mb-6">
+                <button onclick="openBiblioteca()" class="w-full bg-[#22222d] hover:bg-[#2a2a38] text-white text-sm font-medium py-3 px-4 rounded-2xl flex items-center justify-between transition border border-white/5">
+                    <span class="flex items-center gap-3"><i class="fa-solid fa-folder-open text-pink-400"></i> Biblioteca</span>
+                    <span class="bg-purple-600/30 text-purple-300 text-xs px-2 py-0.5 rounded-full">0</span>
+                </button>
+
+                <button onclick="nuevoChat()" class="w-full bg-[#22222d] hover:bg-[#2a2a38] text-white text-sm font-medium py-3 px-4 rounded-2xl flex items-center gap-3 transition border border-white/5">
+                    <i class="fa-solid fa-plus text-purple-400"></i> Nuevo chat
+                </button>
+
+                <button onclick="openLoginModal()" class="w-full bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:bg-white/5 text-blue-300 text-sm font-medium py-3 px-4 rounded-2xl flex items-center justify-between transition border border-blue-500/20">
+                    <span class="flex items-center gap-3"><i class="fa-solid fa-user-circle text-blue-400"></i> Iniciar sesión / Crear cuenta</span>
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">RECIENTES</div>
+            <div id="historial-chats" class="space-y-1.5 overflow-y-auto max-h-[50vh]">
+                <div id="no-chats" class="text-xs text-gray-500 px-1 italic">Aún no hay conversaciones guardadas.</div>
+            </div>
+        </div>
+
+        <div>
+            <button onclick="openApiKeyModal()" class="w-full text-left px-3 py-2.5 rounded-xl text-xs flex items-center gap-3 text-gray-400 hover:bg-white/5 transition"><i class="fa-solid fa-key text-amber-400"></i> Configurar API Key Gemini</button>
+        </div>
+    </div>
+
+    <!-- MODAL BIBLIOTECA -->
+    <div id="biblioteca-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#16161c] p-6 rounded-3xl border border-white/10 w-full max-w-sm text-center relative shadow-2xl">
+            <button onclick="closeBiblioteca()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="w-12 h-12 bg-pink-500/20 text-pink-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-folder-open"></i></div>
+            <h2 class="text-lg font-bold mb-1 text-white">Biblioteca de Fotos IA</h2>
+            <p class="text-xs text-gray-400 mb-4">Usa la herramienta IA de Imágenes para crear fotos y se guardarán automáticamente aquí.</p>
+        </div>
+    </div>
+
+    <!-- MODAL INICIAR SESIÓN / CREAR CUENTA -->
+    <div id="login-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#16161c] p-6 rounded-3xl border border-white/10 w-full max-w-sm text-center relative shadow-2xl">
+            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-lock"></i></div>
+            <h2 id="login-title" class="text-lg font-bold mb-1 text-white">Iniciar sesión</h2>
+            <p id="login-desc" class="text-xs text-gray-400 mb-4">Ingresa tu nombre de usuario y contraseña para continuar.</p>
+            
+            <div id="login-fields" class="space-y-3 mb-4">
+                <input type="text" id="login-user" placeholder="Nombre de usuario" class="w-full bg-[#0b0b0f] text-white p-3 rounded-2xl outline-none border border-white/10 text-sm">
+                <input type="email" id="login-email" placeholder="Correo electrónico (ej. correo@gmail.com)" class="w-full bg-[#0b0b0f] text-white p-3 rounded-2xl outline-none border border-white/10 text-sm hidden">
+                <input type="password" id="login-pass" placeholder="Contraseña" class="w-full bg-[#0b0b0f] text-white p-3 rounded-2xl outline-none border border-white/10 text-sm">
+                
+                <!-- CÓDIGO DE VERIFICACIÓN -->
+                <div id="verify-code-container" class="hidden space-y-2">
+                    <p class="text-xs text-purple-400 font-medium">¡Código de 4 dígitos enviado a tu correo! (Ej: 1234)</p>
+                    <input type="text" id="verify-code-input" maxlength="4" placeholder="••••" class="w-full bg-[#0b0b0f] text-white text-center tracking-widest text-lg p-3 rounded-2xl outline-none border border-purple-500/50 font-mono">
+                </div>
+            </div>
+            
+            <button onclick="submitLogin()" id="login-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-2xl text-sm transition mb-3">Iniciar sesión</button>
+            
+            <button onclick="toggleRegisterMode()" id="login-switch" class="text-xs text-purple-400 hover:underline cursor-pointer">¿No tienes cuenta? Regístrate</button>
+        </div>
+    </div>
+
+    <!-- MODAL API KEY -->
+    <div id="apikey-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#16161c] p-6 rounded-3xl border border-white/10 w-full max-w-sm text-center relative shadow-2xl">
+            <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-key"></i></div>
+            <h2 class="text-xl font-bold mb-2 text-white">Configurar API Key Gemini</h2>
+            <p class="text-xs text-gray-400 mb-4">Pega tu API Key de Google AI Studio.</p>
+            <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-[#0b0b0f] text-white p-3 rounded-2xl mb-4 outline-none border border-white/10 text-sm font-mono">
+            <button onclick="guardarApiKey()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-2xl text-sm transition">Guardar llave</button>
+        </div>
+    </div>
+
+    <script>
+        let isRegister = false;
+        let selectedToolName = 'IA de Preguntas';
+        let currentUser = localStorage.getItem('galaxia_logged_user') || null;
+        let historialChats = JSON.parse(localStorage.getItem('galaxia_historial') || '[]');
+
+        window.onload = function() {
+            renderHistorial();
+        };
+
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            sb.classList.toggle('-translate-x-full');
+        }
+
+        function toggleModelMenu() {
+            const menu = document.getElementById('model-menu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+        }
+
+        function selectModel(modelName) {
+            document.getElementById('current-model-label').innerText = modelName;
+            toggleModelMenu();
+        }
+
+        function toggleToolsMenu() {
+            const dropdown = document.getElementById('tools-dropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('flex');
+        }
+
+        function selectTool(toolName, iconClass) {
+            selectedToolName = toolName;
+            document.getElementById('active-tool-badge').innerText = toolName;
+            toggleToolsMenu();
+        }
+
+        function activarMicrofono() {
+            const input = document.getElementById('user-input');
+            const micIcon = document.getElementById('mic-icon');
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('El reconocimiento de voz no está soportado en este navegador.');
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'es-ES';
+            micIcon.classList.remove('fa-microphone');
+            micIcon.classList.add('fa-spinner', 'fa-spin', 'text-red-400');
+            
+            recognition.onresult = function(event) {
+                input.value = event.results[0][0].transcript;
+                micIcon.classList.remove('fa-spinner', 'fa-spin', 'text-red-400');
+                micIcon.classList.add('fa-microphone');
+            };
+            recognition.onerror = function() {
+                micIcon.classList.remove('fa-spinner', 'fa-spin', 'text-red-400');
+                micIcon.classList.add('fa-microphone');
+            };
+            recognition.onend = function() {
+                micIcon.classList.remove('fa-spinner', 'fa-spin', 'text-red-400');
+                micIcon.classList.add('fa-microphone');
+            };
+            recognition.start();
+        }
+
+        function enviarMensaje() {
+            const input = document.getElementById('user-input');
+            const texto = input.value.trim();
+            if(!texto) return;
+
+            const mainContent = document.getElementById('main-content');
+            
+            // Generar respuesta inteligente según la herramienta seleccionada
+            let respuestaIA = "Entendido perfectamente, friend. Analizando tu solicitud con el motor de Galaxia IA...";
+            if (selectedToolName.includes('Estudio')) {
+                respuestaIA = "Aquí tienes tu tabla de estudio y repaso optimizada: \n• 2 x 1 = 2\n• 2 x 2 = 4\n• 2 x 3 = 6\n¡Sigue practicando las matemáticas!";
+            } else if (selectedToolName.includes('Imágenes')) {
+                respuestaIA = `<div class="mt-2"><p class="text-xs text-pink-400 mb-2">Imagen generada con éxito:</p><img src="https://placehold.co/400x300/16161c/a855f7?text=${encodeURIComponent(texto)}" class="rounded-xl border border-white/10 w-full object-cover shadow-lg" alt="Imagen IA"></div>`;
+            } else if (selectedToolName.includes('Google Maps')) {
+                respuestaIA = `Ubicación encontrada en el mapa para: "${texto}". Mostrando ruta óptima, puntos de interés y coordenadas en tiempo real.`;
+            } else if (selectedToolName.includes('Noticias')) {
+                respuestaIA = `Resultados de búsqueda y noticias recientes sobre: "${texto}". Todo actualizado al momento sin costo.`;
+            } else {
+                respuestaIA = `Respuesta generada por el cerebro de Galaxia AI para tu pregunta sobre "${texto}": ¡Todo marcha excelente y listo para ayudarte!`;
+            }
+
+            mainContent.innerHTML = `
+                <div class="w-full space-y-4 text-left py-4 max-w-xl mx-auto">
+                    <div class="flex justify-end">
+                        <div class="bg-blue-600 text-white rounded-2xl px-4 py-3 max-w-[85%] text-sm shadow">
+                            ${texto}
+                        </div>
+                    </div>
+                    <div class="flex justify-start">
+                        <div class="bg-[#16161c] border border-white/10 text-gray-200 rounded-2xl px-4 py-4 max-w-[85%] text-sm shadow-xl">
+                            <p class="font-semibold text-purple-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-sparkles"></i> ${selectedToolName}</p>
+                            <div class="text-gray-300 leading-relaxed">${respuestaIA}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Guardar en historial
+            historialChats.unshift({ pregunta: texto, respuesta: respuestaIA, tool: selectedToolName, fecha: new Date().toLocaleTimeString() });
+            localStorage.setItem('galaxia_historial', JSON.stringify(historialChats));
+            renderHistorial();
+
+            input.value = '';
+        }
+
+        function renderHistorial() {
+            const container = document.getElementById('historial-chats');
+            if (historialChats.length === 0) {
+                container.innerHTML = `<div id="no-chats" class="text-xs text-gray-500 px-1 italic">Aún no hay conversaciones guardadas.</div>`;
+                return;
+            }
+            container.innerHTML = historialChats.map((chat, index) => `
+                <div onclick="cargarChat(${index})" class="w-full bg-[#22222d] hover:bg-[#2a2a38] text-gray-300 hover:text-white text-xs p-3 rounded-xl cursor-pointer transition flex items-center justify-between border border-white/5 truncate">
+                    <span class="truncate"><i class="fa-solid fa-message text-purple-400 mr-2"></i> ${chat.pregunta}</span>
+                    <span class="text-[10px] text-gray-500 ml-2">${chat.fecha}</span>
+                </div>
+            `).join('');
+        }
+
+        function cargarChat(index) {
+            const chat = historialChats[index];
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <div class="w-full space-y-4 text-left py-4 max-w-xl mx-auto">
+                    <div class="flex justify-end">
+                        <div class="bg-blue-600 text-white rounded-2xl px-4 py-3 max-w-[85%] text-sm shadow">
+                            ${chat.pregunta}
+                        </div>
+                    </div>
+                    <div class="flex justify-start">
+                        <div class="bg-[#16161c] border border-white/10 text-gray-200 rounded-2xl px-4 py-4 max-w-[85%] text-sm shadow-xl">
+                            <p class="font-semibold text-purple-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-sparkles"></i> ${chat.tool}</p>
+                            <div class="text-gray-300 leading-relaxed">${chat.respuesta}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            toggleSidebar();
+        }
+
+        function nuevoChat() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 bg-purple-500/30 blur-2xl rounded-full"></div>
+                    <div class="relative w-20 h-20 rounded-3xl bg-gradient-to-tr from-purple-600 via-pink-500 to-indigo-500 flex items-center justify-center shadow-2xl border border-white/20">
+                        <i class="fa-solid fa-star text-white text-3xl"></i>
+                    </div>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-4 leading-snug">Hola amigo, ¿qué tal las matemáticas?</h1>
+                <div class="inline-block bg-[#16161c] border border-purple-500/30 text-purple-300 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                    <span id="active-tool-badge">IA de Preguntas</span>
+                </div>
+            `;
+            if(document.getElementById('sidebar').classList.contains('transition-transform') === false) {
+                // mantener
+            }
+        }
+
+        function openBiblioteca() {
+            document.getElementById('biblioteca-modal').classList.remove('hidden');
+            document.getElementById('biblioteca-modal').classList.add('flex');
+        }
+
+        function closeBiblioteca() {
+            document.getElementById('biblioteca-modal').classList.remove('flex');
+            document.getElementById('biblioteca-modal').classList.add('hidden');
+        }
+
+        function openLoginModal() {
+            isRegister = false;
+            updateLoginModalView();
+            document.getElementById('login-modal').classList.remove('hidden');
+            document.getElementById('login-modal').classList.add('flex');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.remove('flex');
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        function toggleRegisterMode() {
+            isRegister = !isRegister;
+            updateLoginModalView();
+        }
+
+        function updateLoginModalView() {
+            const title = document.getElementById('login-title');
+            const desc = document.getElementById('login-desc');
+            const emailInput = document.getElementById('login-email');
+            const btn = document.getElementById('login-btn');
+            const switchBtn = document.getElementById('login-switch');
+            const verifyContainer = document.getElementById('verify-code-container');
+
+            verifyContainer.classList.add('hidden');
+            if (isRegister) {
+                title.innerText = 'Crear Cuenta Nueva';
+                desc.innerText = 'Ingresa tu usuario, correo y contraseña.';
+                emailInput.classList.remove('hidden');
+                btn.innerText = 'Registrarse y verificar';
+                switchBtn.innerText = '¿Ya tienes cuenta? Inicia sesión';
+            } else {
+                title.innerText = 'Iniciar sesión';
+                desc.innerText = 'Ingresa tu nombre de usuario y contraseña para continuar.';
+                emailInput.classList.add('hidden');
+                btn.innerText = 'Iniciar sesión';
+                switchBtn.innerText = '¿No tienes cuenta? Regístrate';
+            }
+        }
+
+        function submitLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const email = document.getElementById('login-email').value.trim();
+            const verifyContainer = document.getElementById('verify-code-container');
+            const verifyInput = document.getElementById('verify-code-input');
+
+            if (!user || !pass) {
+                alert('Por favor completa todos los campos.');
+                return;
+            }
+
+            if (isRegister) {
+                if (!email) {
+                    alert('Por favor ingresa tu correo electrónico.');
+                    return;
+                }
+                if (verifyContainer.classList.contains('hidden')) {
+                    verifyContainer.classList.remove('hidden');
+                    document.getElementById('login-btn').innerText = 'Confirmar Código (Ej. 1234)';
+                    alert('¡Código de 4 dígitos enviado al correo! Ingrésalo para terminar.');
+                    return;
+                } else {
+                    if (verifyInput.value.length !== 4) {
+                        alert('Ingresa un código válido de 4 dígitos.');
+                        return;
+                    }
+                    localStorage.setItem('galaxia_user_' + user, JSON.stringify({ user, pass, email }));
+                    localStorage.setItem('galaxia_logged_user', user);
+                    currentUser = user;
+                    alert('¡Cuenta creada y verificada con éxito!');
+                    closeLoginModal();
+                    return;
+                }
+            } else {
+                const saved = localStorage.getItem('galaxia_user_' + user);
+                if (!saved) {
+                    alert('La cuenta no existe. Por favor regístrate primero.');
+                    return;
+                }
+                const data = JSON.parse(saved);
+                if (data.pass !== pass) {
+                    alert('Contraseña incorrecta.');
+                    return;
+                }
+                localStorage.setItem('galaxia_logged_user', user);
+                currentUser = user;
+                alert('¡Inicio de sesión exitoso, bienvenido ' + user + '!');
+                closeLoginModal();
+            }
+        }
+
+        function openApiKeyModal() {
+            document.getElementById('apikey-modal').classList.remove('hidden');
+            document.getElementById('apikey-modal').classList.add('flex');
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('apikey-modal').classList.remove('flex');
+            document.getElementById('apikey-modal').classList.add('hidden');
+        }
+
+        function guardarApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            if(!key) {
+                alert('Ingresa una API Key válida.');
+                return;
+            }
+            localStorage.setItem('gemini_api_key', key);
+            alert('¡API Key guardada correctamente!');
+            closeApiKeyModal();
+        }
+    </script>
+</body>
+</html>
